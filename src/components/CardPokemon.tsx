@@ -1,8 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { getColorByType, TouchableOpacity } from "../common/utils";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
+
+import pokeballBg from "../assets/pokeball-icon.png";
 
 type CardProps = {
   pokemon: any;
@@ -25,7 +27,30 @@ const CardPokemon = ({ pokemon }: CardProps) => {
         <View style={styles.containerId}>
           <Text style={styles.idPokemon}>{getNumberPokemon(String(pokemon.id))}</Text>
         </View>
-        <Text style={styles.textType}>{pokemon.types[0].type.name}</Text>
+        <View style={styles.containerNames}>
+          <Text style={styles.namePokemon}>{pokemon.name}</Text>
+          <View>
+            {Object.keys(pokemon.types).map((id, index) => {
+              return (
+                <View key={index} style={styles.viewType}>
+                  <Text style={styles.textType}>{pokemon.types[id].type.name}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+        <View style={styles.containerImages}>
+          <Image
+            style={{ position: "absolute", width: 75, height: 75, opacity: 0.07 }}
+            source={pokeballBg}
+          />
+          <Image
+            style={{ width: 65, height: 65 }}
+            width={65}
+            height={65}
+            source={{ uri: `https://pokeres.bastionbot.org/images/pokemon/${pokemon.id}.png` }}
+          />
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -40,6 +65,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 2.3,
+    elevation: 2,
   },
   touchView: {
     justifyContent: "center",
@@ -48,18 +82,46 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   textType: {
-    fontFamily: Fonts.Pop600,
-    color: Theme.GRAY_LIGHT,
+    fontFamily: Fonts.Pop500,
+    color: Theme.BACKGROUND,
+    fontSize: 11,
+    paddingHorizontal: 5,
   },
   containerId: {
     position: "absolute",
     right: 15,
-    top: 10,
+    top: 5,
+  },
+  containerNames: {
+    position: "absolute",
+    left: 13,
+    top: 20,
   },
   idPokemon: {
     fontFamily: Fonts.Pop300,
     opacity: 0.4,
-    fontSize: 15,
+    fontSize: 13,
+  },
+  namePokemon: {
+    fontFamily: Fonts.Pop700,
+    color: Theme.BACKGROUND,
+    fontSize: 17,
+  },
+  viewType: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 15,
+    maxWidth: 60,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    marginTop: 5,
+  },
+  containerImages: {
+    position: "relative",
+    left: 40,
+    top: 22,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

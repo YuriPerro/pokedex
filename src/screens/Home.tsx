@@ -16,7 +16,7 @@ const Home = () => {
 
   useEffect(() => {
     async function getData() {
-      const resp = await api.get("pokemon?limit=10&offset=0");
+      const resp = await api.get("pokemon?limit=15&offset=0");
       const results = resp.data.results;
       const _pokemons = await Promise.all(
         results.map(async (pokemon: any) => {
@@ -66,12 +66,13 @@ const styles = StyleSheet.create({
   wrappedContainer: {
     marginTop: Platform.OS === "ios" ? getStatusBarHeight() : StatusBar.currentHeight,
     paddingTop: 40,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
     flex: 1
   },
   title: {
     fontFamily: Fonts.Pop600,
-    fontSize: 23,
+    fontSize: 26,
+    paddingLeft: 15
   },
   imageBg: {
     width: 310,
