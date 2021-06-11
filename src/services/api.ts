@@ -4,4 +4,8 @@ const api = axios.create({
   baseURL: "https://pokeapi.co/api/v2/",
 });
 
-export default api;
+const getPokemon = async (pokemon: any) => {
+  return await axios.get(pokemon.url);
+};
+
+export { api, getPokemon };
