@@ -20,11 +20,14 @@ import { Load } from "../components/Load";
 import { useState } from "react";
 import CardPokemon from "../components/CardPokemon";
 import { TouchableOpacity } from "../common/utils";
+import { useNavigation } from "@react-navigation/native";
 
 const Home = () => {
+  const navigation = useNavigation();
+
   const [loading, setLoading] = useState(true);
-  const [filteredPokemons, setFilteredPokemons] = useState<any[]>([]);
-  const [pokemons, setPokemons] = useState<any[]>([]);
+  const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
@@ -36,8 +39,8 @@ const Home = () => {
   const fetchPokemons = async () => {
     const resp = await api.get(`pokemon?limit=10&offset=${page}`);
     const results = resp.data.results;
-    const _pokemons = await Promise.all(
-      results.map(async (pokemon: any) => {
+    const _pokemons: Array<Pokemon> = await Promise.all(
+      results.map(async (pokemon: Pokemon) => {
         let pokemonFetched = await (await getPokemon(pokemon)).data;
         return pokemonFetched;
       })
@@ -55,13 +58,17 @@ const Home = () => {
     setLoading(false);
   };
 
-  function handleFetchMore(distance: number) {
+  const handleFetchMore = (distance: number) => {
     if (distance < 1) return;
 
     setLoadingMore(true);
     setPage((oldValue) => oldValue + 10);
     fetchPokemons();
-  }
+  };
+
+  const goProfilePokemon = (pokemon: Pokemon) => {
+    navigation.navigate("ProfilePokemon", { pokemon: pokemon });
+  };
 
   if (loading) return <Load />;
 
@@ -81,7 +88,9 @@ const Home = () => {
             numColumns={2}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => String(item.id)}
-            renderItem={({ item, index }) => <CardPokemon key={index} pokemon={item} />}
+            renderItem={({ item, index }) => (
+              <CardPokemon onClickCard={goProfilePokemon} key={index} pokemon={item} />
+            )}
             onEndReachedThreshold={0.2}
             onEndReached={({ distanceFromEnd }) => {
               handleFetchMore(distanceFromEnd);

@@ -1,29 +1,22 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { getColorByType, TouchableOpacity } from "../common/utils";
+import { getColorByType, getNumberPokemon, getUrlImages, TouchableOpacity } from "../common/utils";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
 
 import pokeballBg from "../assets/pokeball-icon.png";
 
 type CardProps = {
-  pokemon: any;
+  pokemon: Pokemon;
+  onClickCard: (pokemon: Pokemon) => void;
 };
 
-const CardPokemon = ({ pokemon }: CardProps) => {
-  const getNumberPokemon = (id: string) => {
-    if (id.length == 1) {
-      return "#00" + id;
-    } else if (id.length >= 2) {
-      return "#0" + id;
-    }
-  };
-
+const CardPokemon = ({ pokemon, onClickCard }: CardProps) => {
   return (
     <View
       style={[styles.container, { backgroundColor: getColorByType(pokemon.types[0].type.name) }]}
     >
-      <TouchableOpacity style={styles.touchView}>
+      <TouchableOpacity style={styles.touchView} onPress={() => onClickCard(pokemon)}>
         <View style={styles.containerId}>
           <Text style={styles.idPokemon}>{getNumberPokemon(String(pokemon.id))}</Text>
         </View>
@@ -33,7 +26,7 @@ const CardPokemon = ({ pokemon }: CardProps) => {
             {Object.keys(pokemon.types).map((id, index) => {
               return (
                 <View key={index} style={styles.viewType}>
-                  <Text style={styles.textType}>{pokemon.types[id].type.name}</Text>
+                  <Text style={styles.textType}>{pokemon.types[parseInt(id)].type.name}</Text>
                 </View>
               );
             })}
@@ -48,7 +41,7 @@ const CardPokemon = ({ pokemon }: CardProps) => {
             style={{ width: 65, height: 65 }}
             width={65}
             height={65}
-            source={{ uri: `https://pokeres.bastionbot.org/images/pokemon/${pokemon.id}.png` }}
+            source={{ uri: getUrlImages(String(pokemon.id)) }}
           />
         </View>
       </TouchableOpacity>

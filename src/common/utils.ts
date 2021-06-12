@@ -20,6 +20,18 @@ const height = Dimensions.get("window").height;
 
 const isSmallDevice = width < 375;
 
+const getUrlImages = (id: string) => {
+  return `https://pokeres.bastionbot.org/images/pokemon/${id}.png`;
+};
+
+const getNumberPokemon = (id: string) => {
+  if (id.length == 1) {
+    return "#00" + id;
+  } else if (id.length >= 2) {
+    return "#0" + id;
+  }
+};
+
 const getColorByType = (type: string) => {
   switch (type) {
     case "grass":
@@ -61,4 +73,4 @@ const getColorByType = (type: string) => {
   }
 };
 
-export { width, height, isSmallDevice, getColorByType };
+export { width, height, isSmallDevice, getColorByType, getUrlImages, getNumberPokemon };
