@@ -32,7 +32,7 @@ const getNumberPokemon = (id: string) => {
   }
 };
 
-const getColorByType = (type: string) => {
+const getColorByType = (type: string | undefined) => {
   switch (type) {
     case "grass":
       return "#48D0B0";
