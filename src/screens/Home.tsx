@@ -8,6 +8,8 @@ import {
   Image,
   FlatList,
   ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
 } from "react-native";
 import { getBottomSpace, getStatusBarHeight } from "react-native-iphone-x-helper";
 import { Theme } from "../styles/colors";
@@ -19,18 +21,21 @@ import { api, getPokemon } from "../services/api";
 import { Load } from "../components/Load";
 import { useState } from "react";
 import CardPokemon from "../components/CardPokemon";
-import { TouchableOpacity } from "../common/utils";
+import { height, TouchableOpacity, width } from "../common/utils";
 import { useNavigation } from "@react-navigation/native";
+import { TextInput } from "react-native-gesture-handler";
 
 const Home = () => {
   const navigation = useNavigation();
 
   const [loading, setLoading] = useState(true);
+  const [searchIsOpen, setSearchIsOpen] = useState(false);
   const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
+  const [marginBottom, setMarginBottom] = useState(30);
 
   useEffect(() => {
     fetchPokemons();
@@ -107,13 +112,44 @@ const Home = () => {
             }
           />
         </View>
-        <View style={styles.containerSearch}>
-          <TouchableOpacity
-            style={{ width: 60, height: 60, justifyContent: "center", alignItems: "center" }}
-          >
-            <AntDesign name="search1" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+
+        <KeyboardAvoidingView behavior="padding">
+          <View style={[styles.containerSearch, { width: searchIsOpen ? "95%" : 60 }]}>
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={() => setSearchIsOpen(true)}
+              disabled={searchIsOpen}
+              style={{
+                width: searchIsOpen ? "95%" : 60,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {searchIsOpen ? (
+                <View style={{ flexDirection: "row", alignItems: "center", width: "100%" }}>
+                  <TextInput
+                    placeholder="Pesquisar Pokemon"
+                    style={{
+                      fontFamily: Fonts.Pop500,
+                      color: Theme.BACKGROUND,
+                      fontSize: 16,
+                      paddingLeft: 10,
+                      borderRadius: 25,
+                      marginRight: 15,
+                      height: 60,
+                      width: "80%",
+                    }}
+                  />
+                  <TouchableOpacity onPress={() => setSearchIsOpen(false)}>
+                    <AntDesign name="close" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <AntDesign name="search1" size={24} color="white" />
+              )}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </View>
   );
@@ -164,9 +200,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 2.9,
     elevation: 2,
-    position: "absolute",
     bottom: Platform.OS === "ios" ? getBottomSpace() : 25,
     right: 10,
+    alignSelf: "flex-end",
   },
 });
 

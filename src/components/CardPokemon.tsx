@@ -1,30 +1,21 @@
-import React, { memo, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import {
-  getColorByType,
-  getNumberPokemon,
-  getUrlImages,
-  TouchableOpacity,
-  width,
-} from "../common/utils";
+import { getColorByType, getNumberPokemon, getUrlImages, TouchableOpacity } from "../common/utils";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
 
 import pokeballBg from "../assets/pokeball-icon.png";
-import { useMemo } from "react";
 
 type CardProps = {
   pokemon: Pokemon;
   onClickCard: (pokemon: Pokemon) => void;
-  key: string;
 };
 
 class CardPokemon extends PureComponent<CardProps> {
   render() {
-    const { pokemon, onClickCard, key } = this.props;
+    const { pokemon, onClickCard } = this.props;
     return (
       <View
-        key={key}
         style={[styles.container, { backgroundColor: getColorByType(pokemon.types[0].type.name) }]}
       >
         <TouchableOpacity style={styles.touchView} onPress={() => onClickCard(pokemon)}>
@@ -63,7 +54,7 @@ class CardPokemon extends PureComponent<CardProps> {
 
 const styles = StyleSheet.create({
   container: {
-    width: 200,
+    width: "44%",
     height: 120,
     borderRadius: 15,
     backgroundColor: Theme.FIRE,

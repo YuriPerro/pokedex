@@ -1,24 +1,30 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Platform,
   StatusBar,
   StyleSheet,
   Text,
   View,
+  Image,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from "react-native";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Theme } from "../styles/colors";
 import { getStatusBarHeight } from "react-native-iphone-x-helper";
 import { getColorByType, getNumberPokemon, TouchableOpacity, width } from "../common/utils";
 import { Fonts } from "../styles/fonts";
 import PokemonImageScroll from "../components/PokemonImageScroll";
 
+import pokeballBg from "../assets/pokeball-icon.png";
+import PokeballBG from "../components/PokeballBG";
+import { api, getPokemon } from "../services/api";
+
 const ProfilePokemon = () => {
   const route = useRoute<any>();
+  const flatList = useRef<FlatList>(null);
   const navigation = useNavigation();
   const [pokemon, setPokemon] = useState<Pokemon>();
   const [pokemonList, setPokemonList] = useState<Array<Pokemon>>([]);
@@ -26,9 +32,23 @@ const ProfilePokemon = () => {
   useEffect(() => {
     if (route.params.pokemon) {
       setPokemon(route.params.pokemon);
-      setPokemonList(route.params.pokemonList);
+
+      fetchPokemons();
     }
   }, []);
+
+  const fetchPokemons = async () => {
+    const resp = await api.get(`pokemon?limit=6&offset=0`);
+    const results = resp.data.results;
+    const _pokemons: Array<Pokemon> = await Promise.all(
+      results.map(async (pokemon: Pokemon) => {
+        let pokemonFetched = await (await getPokemon(pokemon)).data;
+        return pokemonFetched;
+      })
+    );
+
+    setPokemonList(_pokemons);
+  };
 
   // Function used for convert Hectograma to pound
   const convertHectoToLbs = (lbs: number) => {
@@ -41,18 +61,19 @@ const ProfilePokemon = () => {
   };
 
   const renderItem = ({ item, index }: any) => {
-    if (pokemon) return <PokemonImageScroll idPokemon={pokemon?.id} key={index} />;
-    else return <Text>Not Found.</Text>;
+    console.log(item.id);
+    return <PokemonImageScroll idPokemon={item?.id} key={index} />;
   };
   const keyExtractor = (item: Pokemon) => item.id.toString();
-
   const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     let pageNumber = Math.min(
       Math.max(Math.floor(e.nativeEvent.contentOffset.x / width + 0.5) + 1, 0),
       pokemonList.length
     );
-    console.log(pageNumber);
+    setPokemon(pokemonList[pageNumber - 1]);
   };
+
+  const getItemLayout = (data: any, index: any) => ({ length: 150, offset: 370 * index, index });
 
   return (
     <View
@@ -78,8 +99,18 @@ const ProfilePokemon = () => {
             })}
         </View>
       </View>
-      <View style={{ zIndex: 999, height: 200 }}>
+      <View style={{ zIndex: 999, height: 250, alignItems: "center" }}>
+        <View style={{ position: "absolute" }}>
+          {/* <Image
+            width={220}
+            height={220}
+            style={{ width: 220, height: 220, top: 20, position: "relative" }}
+            source={pokeballBg}
+          /> */}
+          <PokeballBG width={100} height={100} style={{ height: 100, width: 100 }} />
+        </View>
         <FlatList
+          ref={flatList}
           data={pokemonList}
           horizontal
           keyExtractor={keyExtractor}
@@ -87,6 +118,14 @@ const ProfilePokemon = () => {
           pagingEnabled
           renderItem={renderItem}
           onMomentumScrollEnd={onScrollEnd}
+          initialScrollIndex={3}
+          getItemLayout={getItemLayout}
+          // onScrollToIndexFailed={(info) => {
+          //   const wait = new Promise((resolve) => setTimeout(resolve, 100));
+          //   wait.then(() => {
+          //     flatList.current?.scrollToIndex({ index: info.index, animated: true });
+          //   });
+          // }}
         />
       </View>
       {pokemon && (
@@ -107,7 +146,7 @@ const ProfilePokemon = () => {
               </View>
             </View>
 
-            <View style={{ marginLeft: 25 }}>
+            <View style={{ marginLeft: 45 }}>
               <View style={styles.itemInfo}>
                 {Object.keys(pokemon?.stats).map((id) => (
                   <Text key={id} style={styles.infoPokemon}>

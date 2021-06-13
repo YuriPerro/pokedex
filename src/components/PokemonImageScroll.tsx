@@ -4,12 +4,11 @@ import { getUrlImages, width } from "../common/utils";
 
 type Props = {
   idPokemon: number;
-  key: string;
 };
 
-const PokemonImageScroll = ({ idPokemon, key }: Props) => {
+const PokemonImageScroll = ({ idPokemon }: Props) => {
   return (
-    <View key={key} style={styles.container}>
+    <View style={styles.container}>
       <Image
         width={150}
         height={150}
@@ -23,10 +22,10 @@ const PokemonImageScroll = ({ idPokemon, key }: Props) => {
 const styles = StyleSheet.create({
   container: {
     width: width,
-    alignItems: 'center',
-    position: 'relative',
+    alignItems: "center",
+    position: "relative",
     top: 50,
-    zIndex: 99
+    zIndex: 99,
   },
 });
 
