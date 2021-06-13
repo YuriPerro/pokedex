@@ -45,7 +45,7 @@ const getColorByType = (type: string | undefined) => {
     case "bug":
       return "#86C776";
     case "normal":
-      return "#ccc";
+      return "#c4d4d4";
     case "poison":
       return "#A74EC6";
     case "ground":
@@ -59,7 +59,7 @@ const getColorByType = (type: string | undefined) => {
     case "rock":
       return "#AB9957";
     case "ghost":
-      return "#eee";
+      return "#bbbbbb";
     case "ice":
       return "#68D0EE";
     case "dragon":

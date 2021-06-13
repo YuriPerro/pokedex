@@ -6,7 +6,7 @@ type Pokemon = {
   is_default: boolean;
   order: number;
   weight: number;
-  abilities: PokemonAbility;
+  abilities: Array<PokemonAbility>;
   forms: any;
   game_indices: any;
   held_items: any;
@@ -21,7 +21,7 @@ type Pokemon = {
 type PokemonAbility = {
   is_hidden: boolean;
   slot: number;
-  ability: Array<any>;
+  ability: Type;
 };
 
 type PokemonType = {

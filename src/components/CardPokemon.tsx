@@ -1,57 +1,69 @@
-import React from "react";
+import React, { memo, PureComponent } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { getColorByType, getNumberPokemon, getUrlImages, TouchableOpacity } from "../common/utils";
+import {
+  getColorByType,
+  getNumberPokemon,
+  getUrlImages,
+  TouchableOpacity,
+  width,
+} from "../common/utils";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
 
 import pokeballBg from "../assets/pokeball-icon.png";
+import { useMemo } from "react";
 
 type CardProps = {
   pokemon: Pokemon;
   onClickCard: (pokemon: Pokemon) => void;
+  key: string;
 };
 
-const CardPokemon = ({ pokemon, onClickCard }: CardProps) => {
-  return (
-    <View
-      style={[styles.container, { backgroundColor: getColorByType(pokemon.types[0].type.name) }]}
-    >
-      <TouchableOpacity style={styles.touchView} onPress={() => onClickCard(pokemon)}>
-        <View style={styles.containerId}>
-          <Text style={styles.idPokemon}>{getNumberPokemon(String(pokemon.id))}</Text>
-        </View>
-        <View style={styles.containerNames}>
-          <Text style={styles.namePokemon}>{pokemon.name}</Text>
-          <View>
-            {Object.keys(pokemon.types).map((id, index) => {
-              return (
-                <View key={index} style={styles.viewType}>
-                  <Text style={styles.textType}>{pokemon.types[parseInt(id)].type.name}</Text>
-                </View>
-              );
-            })}
+class CardPokemon extends PureComponent<CardProps> {
+  render() {
+    const { pokemon, onClickCard, key } = this.props;
+    return (
+      <View
+        key={key}
+        style={[styles.container, { backgroundColor: getColorByType(pokemon.types[0].type.name) }]}
+      >
+        <TouchableOpacity style={styles.touchView} onPress={() => onClickCard(pokemon)}>
+          <View style={styles.containerId}>
+            <Text style={styles.idPokemon}>{getNumberPokemon(String(pokemon.id))}</Text>
           </View>
-        </View>
-        <View style={styles.containerImages}>
-          <Image
-            style={{ position: "absolute", width: 75, height: 75, opacity: 0.07 }}
-            source={pokeballBg}
-          />
-          <Image
-            style={{ width: 65, height: 65 }}
-            width={65}
-            height={65}
-            source={{ uri: getUrlImages(String(pokemon.id)) }}
-          />
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
-};
+          <View style={styles.containerNames}>
+            <Text style={styles.namePokemon}>{pokemon.name}</Text>
+            <View>
+              {Object.keys(pokemon.types).map((id, index) => {
+                return (
+                  <View key={index} style={styles.viewType}>
+                    <Text style={styles.textType}>{pokemon.types[parseInt(id)].type.name}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+          <View style={styles.containerImages}>
+            <Image
+              style={{ position: "absolute", width: 75, height: 75, opacity: 0.07 }}
+              source={pokeballBg}
+            />
+            <Image
+              style={{ width: 65, height: 65 }}
+              width={65}
+              height={65}
+              source={{ uri: getUrlImages(String(pokemon.id)) }}
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
-    width: "44%",
+    width: 200,
     height: 120,
     borderRadius: 15,
     backgroundColor: Theme.FIRE,

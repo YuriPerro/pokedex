@@ -67,8 +67,13 @@ const Home = () => {
   };
 
   const goProfilePokemon = (pokemon: Pokemon) => {
-    navigation.navigate("ProfilePokemon", { pokemon: pokemon });
+    navigation.navigate("ProfilePokemon", { pokemon: pokemon, pokemonList: filteredPokemons });
   };
+
+  const renderRow = ({ item, index }: any) => {
+    return <CardPokemon onClickCard={goProfilePokemon} key={index} pokemon={item} />;
+  };
+  const keyExtractor = (item: Pokemon) => item.id.toString();
 
   if (loading) return <Load />;
 
@@ -87,10 +92,8 @@ const Home = () => {
             data={filteredPokemons}
             numColumns={2}
             showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={({ item, index }) => (
-              <CardPokemon onClickCard={goProfilePokemon} key={index} pokemon={item} />
-            )}
+            keyExtractor={keyExtractor}
+            renderItem={renderRow}
             onEndReachedThreshold={0.2}
             onEndReached={({ distanceFromEnd }) => {
               handleFetchMore(distanceFromEnd);
