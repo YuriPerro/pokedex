@@ -20,68 +20,57 @@ import { useState } from "react";
 import CardPokemon from "../components/CardPokemon";
 import { useNavigation } from "@react-navigation/native";
 import Search from "../components/Search";
+import { Alert } from "react-native";
 
 const Home = () => {
   const navigation = useNavigation();
 
   const [loading, setLoading] = useState(true);
-
   const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
-
   const [loadingMore, setLoadingMore] = useState(false);
-
   const [page, setPage] = useState(0);
-  const [marginBottom, setMarginBottom] = useState(30);
 
   useEffect(() => {
-   fetchPokemons();
-    //fetchPokemonsAllPokemons();
+    fetchPokemons();
+    fetchPokemonsAllPokemons();
   }, []);
 
-  // const fetchPokemonsAllPokemons = () => {
-  //   const resp = await api.get(`pokemon?limit=10&offset=${page}`);
-  //   const results = resp.data.results;
-  //   const _pokemons: Array<Pokemon> = await Promise.all(
-  //     results.map(async (pokemon: Pokemon) => {
-  //       let pokemonFetched = await (await getPokemon(pokemon)).data;
-  //       return pokemonFetched;
-  //     })
-  //   );
-
-  //   if (page > 0) {
-  //     setPokemons((oldValue) => [...oldValue, ..._pokemons]);
-  //     setFilteredPokemons((oldValue) => [...oldValue, ..._pokemons]);
-  //   } else {
-  //     setPokemons(_pokemons);
-  //     setFilteredPokemons(_pokemons);
-  //   }
-
-  //   setLoadingMore(false);
-  //   setLoading(false);
-  // };
+  const fetchPokemonsAllPokemons = async () => {
+    try {
+      const resp = await api.get(`pokemon?limit=1118&offset=0`);
+      const results = resp.data.results;
+      if (results) setAllPokemons(results);
+    } catch (err) {
+      Alert.alert("Ops", "Não conseguimos carregar os pokemons para a pesquisa 😥");
+    }
+  };
 
   const fetchPokemons = async () => {
-    const resp = await api.get(`pokemon?limit=10&offset=${page}`);
-    const results = resp.data.results;
-    const _pokemons: Array<Pokemon> = await Promise.all(
-      results.map(async (pokemon: Pokemon) => {
-        let pokemonFetched = await (await getPokemon(pokemon)).data;
-        return pokemonFetched;
-      })
-    );
+    try {
+      const resp = await api.get(`pokemon?limit=10&offset=${page}`);
+      const results = resp.data.results;
+      const _pokemons: Array<Pokemon> = await Promise.all(
+        results.map(async (pokemon: Pokemon) => {
+          let pokemonFetched = await (await getPokemon(pokemon)).data;
+          return pokemonFetched;
+        })
+      );
 
-    if (page > 0) {
-      setPokemons((oldValue) => [...oldValue, ..._pokemons]);
-      setFilteredPokemons((oldValue) => [...oldValue, ..._pokemons]);
-    } else {
-      setPokemons(_pokemons);
-      setFilteredPokemons(_pokemons);
+      if (page > 0) {
+        setPokemons((oldValue) => [...oldValue, ..._pokemons]);
+        setFilteredPokemons((oldValue) => [...oldValue, ..._pokemons]);
+      } else {
+        setPokemons(_pokemons);
+        setFilteredPokemons(_pokemons);
+      }
+
+      setLoadingMore(false);
+      setLoading(false);
+    } catch (err) {
+      Alert.alert("Ops", "Não conseguimos carregar os pokemons 😥");
     }
-
-    setLoadingMore(false);
-    setLoading(false);
   };
 
   const handleFetchMore = (distance: number) => {

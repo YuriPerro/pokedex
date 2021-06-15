@@ -28,6 +28,7 @@ import Modal from "react-native-modalbox";
 import pokeballBg from "../assets/pokeball-icon.png";
 import { api, getPokemon, getSpecies } from "../services/api";
 import { Load } from "../components/Load";
+import { Alert } from "react-native";
 
 const FRONT = "FRONT";
 const BACK = "BACK";
@@ -62,35 +63,43 @@ const ProfilePokemon = () => {
   }, []);
 
   const fetchSpecies = async (pokemon: Pokemon) => {
-    if (pokemon) {
-      const resp = await getSpecies(pokemon.id);
-      if (resp) {
-        setSpecies(resp.data);
+    try {
+      if (pokemon) {
+        const resp = await getSpecies(pokemon.id);
+        if (resp) {
+          setSpecies(resp.data);
+        }
       }
+    } catch (error) {
+      Alert.alert("Ops", "Tivemos um erro ao carregar as species 🤔");
     }
   };
 
   const fetchPokemons = async (pokemon: Pokemon) => {
-    return new Promise(async (resolve, reject) => {
-      let listPokemon: Array<Pokemon> = [];
-      for (let i = pokemon.id - 1; i <= pokemon.id + 1; i++) {
-        if (i == 0) continue;
-        console.log("chamou com: " + i);
-        const resp: any = await api.get(`pokemon/${i}`);
-        listPokemon.push(resp.data);
-      }
-      resolve(listPokemon);
-    });
+    try {
+      return new Promise(async (resolve, reject) => {
+        let listPokemon: Array<Pokemon> = [];
+        for (let i = pokemon.id - 1; i <= pokemon.id + 1; i++) {
+          if (i == 0) continue;
+          console.log("chamou com: " + i);
+          const resp: any = await api.get(`pokemon/${i}`);
+          listPokemon.push(resp.data);
+        }
+        resolve(listPokemon);
+      });
 
-    // const results = resp.data.results;
-    // const _pokemons: Array<Pokemon> = await Promise.all(
-    //   results.map(async (pokemon: Pokemon) => {
-    //     let pokemonFetched = await (await getPokemon(pokemon)).data;
-    //     return pokemonFetched;
-    //   })
-    // );
+      // const results = resp.data.results;
+      // const _pokemons: Array<Pokemon> = await Promise.all(
+      //   results.map(async (pokemon: Pokemon) => {
+      //     let pokemonFetched = await (await getPokemon(pokemon)).data;
+      //     return pokemonFetched;
+      //   })
+      // );
 
-    // setPokemonList(_pokemons);
+      // setPokemonList(_pokemons);
+    } catch (error) {
+      Alert.alert("Ops", "Tivemos um erro ao carregar os pokemons 😪");
+    }
   };
 
   const fetchOnePokemon = async (id: string, position: string) => {
@@ -320,18 +329,11 @@ const ProfilePokemon = () => {
           </View>
         </View>
       )}
+
       <Modal
         ref={modalRef}
         backdrop
-        style={{
-          width: width * 0.7,
-          height: 380,
-          borderRadius: 10,
-          alignItems: "center",
-          justifyContent: "center",
-          borderBottomColor: getColorByType(pokemon.types[0].type.name),
-          borderBottomWidth: 15
-        }}
+        style={[styles.modal, { borderBottomColor: getColorByType(pokemon.types[0].type.name) }]}
       >
         <Image
           width={60}
@@ -452,6 +454,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Pop600,
     fontSize: 16,
     textAlign: "left",
+  },
+  modal: {
+    width: width * 0.7,
+    height: 380,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottomWidth: 15,
   },
 });
 
