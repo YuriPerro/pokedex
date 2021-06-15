@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { getColorByType, getNumberPokemon, getUrlImages, TouchableOpacity } from "../common/utils";
+import { getColorByType, getNumberPokemon, getUrlImages, TouchableOpacity, width } from "../common/utils";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
 
@@ -54,7 +54,7 @@ class CardPokemon extends PureComponent<CardProps> {
 
 const styles = StyleSheet.create({
   container: {
-    width: "44%",
+    width: width * 0.42,
     height: 120,
     borderRadius: 15,
     backgroundColor: Theme.FIRE,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   touchView: {
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
+    width: width * 0.42,
     height: "100%",
   },
   textType: {
