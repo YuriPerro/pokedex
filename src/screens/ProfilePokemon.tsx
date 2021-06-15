@@ -21,6 +21,10 @@ import PokemonImageScroll from "../components/PokemonImageScroll";
 import pokeballBg from "../assets/pokeball-icon.png";
 import PokeballBG from "../components/PokeballBG";
 import { api, getPokemon } from "../services/api";
+import { Load } from "../components/Load";
+
+const FRONT = "FRONT";
+const BACK = "BACK";
 
 const ProfilePokemon = () => {
   const route = useRoute<any>();
@@ -29,25 +33,56 @@ const ProfilePokemon = () => {
   const [pokemon, setPokemon] = useState<Pokemon>();
   const [pokemonList, setPokemonList] = useState<Array<Pokemon>>([]);
 
+  const [currentIndex, setCurrentIndex] = useState(1);
+  const [oldIndex, setOldIndex] = useState(0);
+
   useEffect(() => {
     if (route.params.pokemon) {
       setPokemon(route.params.pokemon);
+      // setCurrentIndex(route.params.pokemon.id);
+      // async function fetch() {
+      //   if (pokemonList.length == 0) {
+      //     const pok: any = await fetchPokemons(route.params.pokemon);
+      //     console.log("retornou");
+      //     setPokemonList(pok);
+      //   }
+      // }
 
-      fetchPokemons();
+      // fetch();
     }
   }, []);
 
-  const fetchPokemons = async () => {
-    const resp = await api.get(`pokemon?limit=6&offset=0`);
-    const results = resp.data.results;
-    const _pokemons: Array<Pokemon> = await Promise.all(
-      results.map(async (pokemon: Pokemon) => {
-        let pokemonFetched = await (await getPokemon(pokemon)).data;
-        return pokemonFetched;
-      })
-    );
+  const fetchPokemons = async (pokemon: Pokemon) => {
+    return new Promise(async (resolve, reject) => {
+      let listPokemon: Array<Pokemon> = [];
+      for (let i = pokemon.id - 1; i <= pokemon.id + 1; i++) {
+        if (i == 0) continue;
+        console.log("chamou com: " + i);
+        const resp: any = await api.get(`pokemon/${i}`);
+        listPokemon.push(resp.data);
+      }
+      resolve(listPokemon);
+    });
 
-    setPokemonList(_pokemons);
+    // const results = resp.data.results;
+    // const _pokemons: Array<Pokemon> = await Promise.all(
+    //   results.map(async (pokemon: Pokemon) => {
+    //     let pokemonFetched = await (await getPokemon(pokemon)).data;
+    //     return pokemonFetched;
+    //   })
+    // );
+
+    // setPokemonList(_pokemons);
+  };
+
+  const fetchOnePokemon = async (id: string, position: string) => {
+    const resp: any = await api.get(`pokemon/${id}`);
+    console.log("DEU FETCH EM: " + id);
+    if (position === FRONT) {
+      setPokemonList((old) => [...old, resp.data]);
+    } else {
+      setPokemonList((old) => [resp.data, ...old]);
+    }
   };
 
   // Function used for convert Hectograma to pound
@@ -61,19 +96,35 @@ const ProfilePokemon = () => {
   };
 
   const renderItem = ({ item, index }: any) => {
-    console.log(item.id);
-    return <PokemonImageScroll idPokemon={item?.id} key={index} />;
+    return <PokemonImageScroll idPokemon={item?.id} key={item.id?.toString()} />;
   };
-  const keyExtractor = (item: Pokemon) => item.id.toString();
+  const keyExtractor = (item: Pokemon) => item?.id?.toString();
   const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     let pageNumber = Math.min(
       Math.max(Math.floor(e.nativeEvent.contentOffset.x / width + 0.5) + 1, 0),
       pokemonList.length
     );
-    setPokemon(pokemonList[pageNumber - 1]);
+    let fixedPage = pageNumber - 1;
+    // let indexFetch = 0;
+    // console.log("Antigo: " + fixedPage);
+    // console.log("Novo: " + pageNumber);
+    // if (oldIndex > currentIndex) {
+    //   indexFetch = currentIndex - 2;
+    //   if (indexFetch > 0) {
+    //     fetchOnePokemon(String(indexFetch), FRONT);
+    //   }
+    // } else {
+    //   indexFetch = currentIndex + 2;
+    //   fetchOnePokemon(String(indexFetch), BACK);
+    // }
+    // setOldIndex(currentIndex);
+    // setCurrentIndex(pageNumber);
+    setPokemon(pokemonList[fixedPage]);
   };
 
   const getItemLayout = (data: any, index: any) => ({ length: 150, offset: 370 * index, index });
+
+  if (!pokemon) return <Load />;
 
   return (
     <View
@@ -109,24 +160,26 @@ const ProfilePokemon = () => {
           /> */}
           <PokeballBG width={100} height={100} style={{ height: 100, width: 100 }} />
         </View>
-        <FlatList
-          ref={flatList}
-          data={pokemonList}
-          horizontal
-          keyExtractor={keyExtractor}
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled
-          renderItem={renderItem}
-          onMomentumScrollEnd={onScrollEnd}
-          initialScrollIndex={3}
-          getItemLayout={getItemLayout}
-          // onScrollToIndexFailed={(info) => {
-          //   const wait = new Promise((resolve) => setTimeout(resolve, 100));
-          //   wait.then(() => {
-          //     flatList.current?.scrollToIndex({ index: info.index, animated: true });
-          //   });
-          // }}
-        />
+        {pokemonList.length > 0 && (
+          <FlatList
+            ref={flatList}
+            data={pokemonList}
+            horizontal
+            keyExtractor={keyExtractor}
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled
+            renderItem={renderItem}
+            onMomentumScrollEnd={onScrollEnd}
+            //initialScrollIndex={pokemon.id == 1 ? 0 : 1}
+            getItemLayout={getItemLayout}
+            // onScrollToIndexFailed={(info) => {
+            //   const wait = new Promise((resolve) => setTimeout(resolve, 100));
+            //   wait.then(() => {
+            //     flatList.current?.scrollToIndex({ index: info.index, animated: true });
+            //   });
+            // }}
+          />
+        )}
       </View>
       {pokemon && (
         <View style={styles.contentProfilePokemon}>
@@ -148,8 +201,14 @@ const ProfilePokemon = () => {
 
             <View style={{ marginLeft: 45 }}>
               <View style={styles.itemInfo}>
-                {Object.keys(pokemon?.stats).map((id) => (
-                  <Text key={id} style={styles.infoPokemon}>
+                {Object.keys(pokemon?.stats).map((id, index) => (
+                  <Text
+                    key={id}
+                    style={[
+                      styles.infoPokemon,
+                      { paddingRight: index == pokemon?.stats.length ? 10 : 0 },
+                    ]}
+                  >
                     {pokemon?.stats[parseFloat(id)].stat.name}
                     {", "}
                   </Text>
@@ -280,6 +339,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
+    flexWrap: "wrap",
   },
   typeInfo: {
     fontFamily: Fonts.Pop300,

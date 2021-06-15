@@ -1,14 +1,17 @@
 import React from "react";
+import { useEffect } from "react";
 import { StyleSheet, Image, View } from "react-native";
 import { getUrlImages, width } from "../common/utils";
 
 type Props = {
   idPokemon: number;
+  key: string;
 };
 
-const PokemonImageScroll = ({ idPokemon }: Props) => {
+const PokemonImageScroll = ({ idPokemon, key }: Props) => {
+
   return (
-    <View style={styles.container}>
+    <View key={key} style={styles.container}>
       <Image
         width={150}
         height={150}
