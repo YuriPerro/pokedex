@@ -8,4 +8,8 @@ const getPokemon = async (pokemon: any) => {
   return await axios.get(pokemon.url);
 };
 
-export { api, getPokemon };
+const getSpecies = async (pokemonId: number) => {
+  return await axios.get("https://pokeapi.co/api/v2/pokemon-species/" + pokemonId);
+};
+
+export { api, getPokemon, getSpecies };

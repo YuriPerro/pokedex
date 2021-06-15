@@ -20,7 +20,7 @@ import PokemonImageScroll from "../components/PokemonImageScroll";
 
 import pokeballBg from "../assets/pokeball-icon.png";
 import PokeballBG from "../components/PokeballBG";
-import { api, getPokemon } from "../services/api";
+import { api, getPokemon, getSpecies } from "../services/api";
 import { Load } from "../components/Load";
 
 const FRONT = "FRONT";
@@ -32,6 +32,7 @@ const ProfilePokemon = () => {
   const navigation = useNavigation();
   const [pokemon, setPokemon] = useState<Pokemon>();
   const [pokemonList, setPokemonList] = useState<Array<Pokemon>>([]);
+  const [species, setSpecies] = useState<any>();
 
   const [currentIndex, setCurrentIndex] = useState(1);
   const [oldIndex, setOldIndex] = useState(0);
@@ -39,6 +40,7 @@ const ProfilePokemon = () => {
   useEffect(() => {
     if (route.params.pokemon) {
       setPokemon(route.params.pokemon);
+      fetchSpecies(route.params.pokemon);
       // setCurrentIndex(route.params.pokemon.id);
       // async function fetch() {
       //   if (pokemonList.length == 0) {
@@ -51,6 +53,15 @@ const ProfilePokemon = () => {
       // fetch();
     }
   }, []);
+
+  const fetchSpecies = async (pokemon: Pokemon) => {
+    if (pokemon) {
+      const resp = await getSpecies(pokemon.id);
+      if (resp) {
+        setSpecies(resp.data);
+      }
+    }
+  };
 
   const fetchPokemons = async (pokemon: Pokemon) => {
     return new Promise(async (resolve, reject) => {
@@ -201,18 +212,26 @@ const ProfilePokemon = () => {
 
             <View style={{ marginLeft: 45 }}>
               <View style={styles.itemInfo}>
-                {Object.keys(pokemon?.stats).map((id, index) => (
-                  <Text
-                    key={id}
+                {Object.keys(pokemon?.stats).map((id, index) =>
+                  index < 2 ? (
+                    <Text key={id} style={[styles.infoPokemon]}>
+                      {pokemon?.stats[parseFloat(id)].stat.name}
+                      {index != 1 ? ", " : null}
+                    </Text>
+                  ) : null
+                )}
+                {pokemon?.stats.length >= 2 ? (
+                  <TouchableOpacity
                     style={[
-                      styles.infoPokemon,
-                      { paddingRight: index == pokemon?.stats.length ? 10 : 0 },
+                      styles.seeMore,
+                      { backgroundColor: getColorByType(pokemon.types[0].type.name) },
                     ]}
                   >
-                    {pokemon?.stats[parseFloat(id)].stat.name}
-                    {", "}
-                  </Text>
-                ))}
+                    <Text style={{ fontFamily: Fonts.Pop700, fontSize: 11, color: "#fff" }}>
+                      Ver mais
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
               <View style={styles.itemInfo}>
                 <Text style={styles.infoPokemon}>
@@ -234,6 +253,7 @@ const ProfilePokemon = () => {
               </View>
             </View>
           </View>
+
           <View style={styles.secondSectionInfo}>
             <View>
               <View style={styles.viewSubTitle}>
@@ -254,14 +274,40 @@ const ProfilePokemon = () => {
               <View style={styles.viewSubTitle}>
                 <Text style={styles.subTitleSection}> </Text>
               </View>
-              <View style={styles.itemInfo}>
-                <Text style={styles.infoPokemon}>dds</Text>
-              </View>
-              <View style={styles.itemInfo}>
-                <Text style={styles.infoPokemon}>xxcc</Text>
-              </View>
-              <View style={styles.itemInfo}>
-                <Text style={styles.infoPokemon}>aa</Text>
+              {species && (
+                <View style={styles.itemInfo}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <MaterialCommunityIcons
+                      name="gender-male"
+                      style={{ transform: [{ rotateZ: "-45deg" }] }}
+                      size={21}
+                      color="blue"
+                    />
+                    <Text style={[styles.infoPokemon, { marginRight: 15 }]}>
+                      {(((8 - species.gender_rate) / 8) * 100).toFixed(1)}%
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <MaterialCommunityIcons name="gender-female" size={24} color="pink" />
+                    <Text style={styles.infoPokemon}>
+                      {((species.gender_rate / 8) * 100).toFixed(1)}%
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {species && (
+                <View style={styles.itemInfo}>
+                  {Object.keys(species.egg_groups).map((id, index) => (
+                    <Text key={id} style={styles.infoPokemon}>
+                      {species?.egg_groups[id]?.name}
+                      {species.egg_groups.length != index + 1 ? ", " : null}
+                    </Text>
+                  ))}
+                </View>
+              )}
+              <View style={[styles.itemInfo, { top: 2 }]}>
+                <Text style={styles.infoPokemon}>{species?.hatch_counter}</Text>
               </View>
             </View>
           </View>
@@ -340,6 +386,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
     flexWrap: "wrap",
+  },
+  seeMore: {
+    width: 70,
+    height: 15,
+    marginLeft: 10,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   typeInfo: {
     fontFamily: Fonts.Pop300,
