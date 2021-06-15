@@ -134,11 +134,16 @@ const Home = () => {
               handleFetchMore(distanceFromEnd);
             }}
             ListEmptyComponent={
-              <View style={{ alignItems: "center", paddingHorizontal: 25, width: '100%' }}>
-                <Text style={{ textAlign: 'center', fontFamily: Fonts.Pop300, fontSize: 18 }}>
+              <View style={{ alignItems: "center", paddingHorizontal: 25, width: "100%" }}>
+                <Text style={{ textAlign: "center", fontFamily: Fonts.Pop300, fontSize: 18 }}>
                   Não encontramos nenhum Pokemon com esse nome
                 </Text>
-                <Entypo name="emoji-sad" size={60} color="black" style={{opacity: .4, marginTop: 25}} />
+                <Entypo
+                  name="emoji-sad"
+                  size={60}
+                  color="black"
+                  style={{ opacity: 0.4, marginTop: 25 }}
+                />
               </View>
             }
             ListFooterComponent={

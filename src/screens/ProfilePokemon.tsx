@@ -42,23 +42,11 @@ const ProfilePokemon = () => {
   const [species, setSpecies] = useState<any>();
   const modalRef = useRef<any>();
 
-  const [currentIndex, setCurrentIndex] = useState(1);
-  const [oldIndex, setOldIndex] = useState(0);
-
   useEffect(() => {
     if (route.params.pokemon) {
       setPokemon(route.params.pokemon);
       fetchSpecies(route.params.pokemon);
-      // setCurrentIndex(route.params.pokemon.id);
-      // async function fetch() {
-      //   if (pokemonList.length == 0) {
-      //     const pok: any = await fetchPokemons(route.params.pokemon);
-      //     console.log("retornou");
-      //     setPokemonList(pok);
-      //   }
-      // }
-
-      // fetch();
+      fetchOnePokemon(route.params.pokemon.id, FRONT);
     }
   }, []);
 
@@ -75,40 +63,13 @@ const ProfilePokemon = () => {
     }
   };
 
-  const fetchPokemons = async (pokemon: Pokemon) => {
-    try {
-      return new Promise(async (resolve, reject) => {
-        let listPokemon: Array<Pokemon> = [];
-        for (let i = pokemon.id - 1; i <= pokemon.id + 1; i++) {
-          if (i == 0) continue;
-          console.log("chamou com: " + i);
-          const resp: any = await api.get(`pokemon/${i}`);
-          listPokemon.push(resp.data);
-        }
-        resolve(listPokemon);
-      });
-
-      // const results = resp.data.results;
-      // const _pokemons: Array<Pokemon> = await Promise.all(
-      //   results.map(async (pokemon: Pokemon) => {
-      //     let pokemonFetched = await (await getPokemon(pokemon)).data;
-      //     return pokemonFetched;
-      //   })
-      // );
-
-      // setPokemonList(_pokemons);
-    } catch (error) {
-      Alert.alert("Ops", "Tivemos um erro ao carregar os pokemons 😪");
-    }
-  };
-
-  const fetchOnePokemon = async (id: string, position: string) => {
-    const resp: any = await api.get(`pokemon/${id}`);
-    console.log("DEU FETCH EM: " + id);
-    if (position === FRONT) {
+  const fetchOnePokemon = async (id: number, position: string) => {
+    if (id == 0) return;
+    let initialIndex = id == 1 ? 1 : id - 1;
+    for (let index = initialIndex; index < id + 2; index++) {
+      const resp: any = await api.get(`pokemon/${index}`);
+      console.log("DEU FETCH EM: " + index);
       setPokemonList((old) => [...old, resp.data]);
-    } else {
-      setPokemonList((old) => [resp.data, ...old]);
     }
   };
 
@@ -117,13 +78,13 @@ const ProfilePokemon = () => {
     return (lbs / 4.536).toFixed(1);
   };
 
-  // Function used for convert decimetres to
+  // Function used for convert decimetres to Pol
   const convertDecToPol = (dec: number) => {
     return (dec * 3.937).toFixed(2);
   };
 
   const renderItem = ({ item, index }: any) => {
-    return <PokemonImageScroll idPokemon={item?.id} key={item.id?.toString()} />;
+    return <PokemonImageScroll idPokemon={item?.id} />;
   };
   const keyExtractor = (item: Pokemon) => item?.id?.toString();
   const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -132,23 +93,10 @@ const ProfilePokemon = () => {
       pokemonList.length
     );
     let fixedPage = pageNumber - 1;
-    // let indexFetch = 0;
-    // console.log("Antigo: " + fixedPage);
-    // console.log("Novo: " + pageNumber);
-    // if (oldIndex > currentIndex) {
-    //   indexFetch = currentIndex - 2;
-    //   if (indexFetch > 0) {
-    //     fetchOnePokemon(String(indexFetch), FRONT);
-    //   }
-    // } else {
-    //   indexFetch = currentIndex + 2;
-    //   fetchOnePokemon(String(indexFetch), BACK);
-    // }
-    // setOldIndex(currentIndex);
-    // setCurrentIndex(pageNumber);
     setPokemon(pokemonList[fixedPage]);
   };
 
+  // Function used for improve performance of Flatlist
   const getItemLayout = (data: any, index: any) => ({ length: 150, offset: 370 * index, index });
 
   if (!pokemon) return <Load />;
@@ -186,26 +134,26 @@ const ProfilePokemon = () => {
             source={pokeballBg}
           /> */}
         </View>
-        {pokemonList.length > 0 && (
-          <FlatList
-            ref={flatList}
-            data={pokemonList}
-            horizontal
-            keyExtractor={keyExtractor}
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled
-            renderItem={renderItem}
-            onMomentumScrollEnd={onScrollEnd}
-            //initialScrollIndex={pokemon.id == 1 ? 0 : 1}
-            getItemLayout={getItemLayout}
-            // onScrollToIndexFailed={(info) => {
-            //   const wait = new Promise((resolve) => setTimeout(resolve, 100));
-            //   wait.then(() => {
-            //     flatList.current?.scrollToIndex({ index: info.index, animated: true });
-            //   });
-            // }}
-          />
-        )}
+        <FlatList
+          ref={flatList}
+          data={pokemonList}
+          horizontal
+          keyExtractor={keyExtractor}
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          renderItem={renderItem}
+          onMomentumScrollEnd={onScrollEnd}
+          getItemLayout={getItemLayout}
+          initialScrollIndex={
+            pokemonList.length > 1 ? (route.params.pokemon.id == 1 ? 0 : 1) : null
+          }
+          // onScrollToIndexFailed={(info) => {
+          //   const wait = new Promise((resolve) => setTimeout(resolve, 100));
+          //   wait.then(() => {
+          //     flatList.current?.scrollToIndex({ index: info.index, animated: true });
+          //   });
+          // }}
+        />
       </View>
       {pokemon && (
         <View style={styles.contentProfilePokemon}>

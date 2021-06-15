@@ -1,5 +1,7 @@
 type Pokemon = {
   id: number;
+  next?: string;
+  previous?: string;
   name: string;
   base_experience: number;
   height: number;

@@ -5,17 +5,15 @@ import { getUrlImages, width } from "../common/utils";
 
 type Props = {
   idPokemon: number;
-  key: string;
 };
 
-const PokemonImageScroll = ({ idPokemon, key }: Props) => {
-
+const PokemonImageScroll = ({ idPokemon }: Props) => {
   return (
-    <View key={key} style={styles.container}>
+    <View key={idPokemon} style={styles.container}>
       <Image
-        width={150}
-        height={150}
-        style={{ width: 150, height: 150 }}
+        width={160}
+        height={160}
+        style={{ width: 160, height: 160 }}
         source={{ uri: getUrlImages(String(idPokemon)) }}
       />
     </View>
@@ -25,10 +23,10 @@ const PokemonImageScroll = ({ idPokemon, key }: Props) => {
 const styles = StyleSheet.create({
   container: {
     width: width,
+    height: 150,
     alignItems: "center",
     position: "relative",
-    top: 50,
-    zIndex: 99,
+    top: 45,
   },
 });
 
