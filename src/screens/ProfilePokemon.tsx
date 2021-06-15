@@ -14,12 +14,18 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Theme } from "../styles/colors";
 import { getStatusBarHeight } from "react-native-iphone-x-helper";
-import { getColorByType, getNumberPokemon, TouchableOpacity, width } from "../common/utils";
+import {
+  getColorByType,
+  getNumberPokemon,
+  getUrlImages,
+  TouchableOpacity,
+  width,
+} from "../common/utils";
 import { Fonts } from "../styles/fonts";
 import PokemonImageScroll from "../components/PokemonImageScroll";
+import Modal from "react-native-modalbox";
 
 import pokeballBg from "../assets/pokeball-icon.png";
-import PokeballBG from "../components/PokeballBG";
 import { api, getPokemon, getSpecies } from "../services/api";
 import { Load } from "../components/Load";
 
@@ -33,6 +39,7 @@ const ProfilePokemon = () => {
   const [pokemon, setPokemon] = useState<Pokemon>();
   const [pokemonList, setPokemonList] = useState<Array<Pokemon>>([]);
   const [species, setSpecies] = useState<any>();
+  const modalRef = useRef<any>();
 
   const [currentIndex, setCurrentIndex] = useState(1);
   const [oldIndex, setOldIndex] = useState(0);
@@ -169,7 +176,6 @@ const ProfilePokemon = () => {
             style={{ width: 220, height: 220, top: 20, position: "relative" }}
             source={pokeballBg}
           /> */}
-          <PokeballBG width={100} height={100} style={{ height: 100, width: 100 }} />
         </View>
         {pokemonList.length > 0 && (
           <FlatList
@@ -222,6 +228,7 @@ const ProfilePokemon = () => {
                 )}
                 {pokemon?.stats.length >= 2 ? (
                   <TouchableOpacity
+                    onPress={() => modalRef.current.open()}
                     style={[
                       styles.seeMore,
                       { backgroundColor: getColorByType(pokemon.types[0].type.name) },
@@ -313,6 +320,36 @@ const ProfilePokemon = () => {
           </View>
         </View>
       )}
+      <Modal
+        ref={modalRef}
+        backdrop
+        style={{
+          width: width * 0.7,
+          height: 380,
+          borderRadius: 10,
+          alignItems: "center",
+          justifyContent: "center",
+          borderBottomColor: getColorByType(pokemon.types[0].type.name),
+          borderBottomWidth: 15
+        }}
+      >
+        <Image
+          width={60}
+          height={60}
+          style={{ width: 60, height: 60 }}
+          source={{ uri: getUrlImages(String(pokemon.id)) }}
+        />
+        <Text style={{ fontFamily: Fonts.Pop600, fontSize: 19 }}>{pokemon.name}</Text>
+        <Text style={{ fontFamily: Fonts.Pop300, fontSize: 12, marginBottom: 30 }}>Species</Text>
+        <View style={{ alignItems: "center" }}>
+          {Object.keys(pokemon?.stats).map((id, index) => (
+            <Text key={id} style={[styles.infoPokemon]}>
+              {pokemon?.stats[parseFloat(id)].stat.name}
+              {index != 1 ? ", " : null}
+            </Text>
+          ))}
+        </View>
+      </Modal>
     </View>
   );
 };
