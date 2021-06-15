@@ -1,6 +1,12 @@
 import React, { PureComponent } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { getColorByType, getNumberPokemon, getUrlImages, TouchableOpacity, width } from "../common/utils";
+import {
+  getColorByType,
+  getNumberPokemon,
+  getUrlImages,
+  TouchableOpacity,
+  width,
+} from "../common/utils";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
 
@@ -16,6 +22,7 @@ class CardPokemon extends PureComponent<CardProps> {
     const { pokemon, onClickCard } = this.props;
     return (
       <View
+        key={pokemon.id}
         style={[styles.container, { backgroundColor: getColorByType(pokemon.types[0].type.name) }]}
       >
         <TouchableOpacity style={styles.touchView} onPress={() => onClickCard(pokemon)}>

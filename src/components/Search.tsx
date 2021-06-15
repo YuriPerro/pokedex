@@ -6,7 +6,11 @@ import { Fonts } from "../styles/fonts";
 import { AntDesign } from "@expo/vector-icons";
 import { getBottomSpace } from "react-native-iphone-x-helper";
 
-const Search = () => {
+type Props = {
+  onChangeText: ((text: string) => void) | undefined;
+};
+
+const Search = ({ onChangeText }: Props) => {
   const [inputIsFocused, setInputIsFocused] = useState(false);
   const [searchIsOpen, setSearchIsOpen] = useState(false);
 
@@ -42,24 +46,21 @@ const Search = () => {
                     placeholder="Pesquisar Pokemon"
                     onFocus={() => setInputIsFocused(true)}
                     onBlur={() => setInputIsFocused(false)}
-                    style={{
-                      fontFamily: Fonts.Pop500,
-                      color: Theme.BACKGROUND,
-                      fontSize: 16,
-                      paddingLeft: 10,
-                      borderRadius: 25,
-                      marginRight: 15,
-                      height: 60,
-                      width: "80%",
-                    }}
+                    onChangeText={onChangeText}
+                    style={styles.input}
                   />
-                  <TouchableOpacity style={{ right: 5 }} onPress={() => setSearchIsOpen(false)}>
-                    <AntDesign name="close" size={24} color="black" />
+                  <TouchableOpacity
+                    style={{ right: 5 }}
+                    onPress={() => {
+                      setSearchIsOpen(false), setInputIsFocused(false);
+                    }}
+                  >
+                    <AntDesign name="close" size={24} color="gray" />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <TouchableOpacity onPress={() => setSearchIsOpen(true)}>
-                  <AntDesign name="search1" size={24} color="white" />
+                  <AntDesign name="search1" size={24} color="gray" />
                 </TouchableOpacity>
               )}
             </View>
@@ -73,7 +74,7 @@ const Search = () => {
             styles.containerSearch,
             {
               width: searchIsOpen ? "95%" : 60,
-              position: searchIsOpen ? undefined : 'absolute',
+              position: searchIsOpen ? undefined : "absolute",
             },
           ]}
         >
@@ -96,24 +97,16 @@ const Search = () => {
                   placeholder="Pesquisar Pokemon"
                   onFocus={() => setInputIsFocused(true)}
                   onBlur={() => setInputIsFocused(false)}
-                  style={{
-                    fontFamily: Fonts.Pop500,
-                    color: Theme.BACKGROUND,
-                    fontSize: 16,
-                    paddingLeft: 10,
-                    borderRadius: 25,
-                    marginRight: 15,
-                    height: 60,
-                    width: "80%",
-                  }}
+                  onChangeText={onChangeText}
+                  style={styles.input}
                 />
                 <TouchableOpacity style={{ right: 5 }} onPress={() => setSearchIsOpen(false)}>
-                  <AntDesign name="close" size={24} color="black" />
+                  <AntDesign name="close" size={24} color="gray" />
                 </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity onPress={() => setSearchIsOpen(true)}>
-                <AntDesign name="search1" size={24} color="white" />
+                <AntDesign name="search1" size={24} color="gray" />
               </TouchableOpacity>
             )}
           </View>
@@ -142,6 +135,16 @@ const styles = StyleSheet.create({
     bottom: Platform.OS === "ios" ? getBottomSpace() : 25,
     right: 10,
     alignSelf: "flex-end",
+  },
+  input: {
+    fontFamily: Fonts.Pop500,
+    color: Theme.BACKGROUND,
+    fontSize: 16,
+    paddingLeft: 10,
+    borderRadius: 25,
+    marginRight: 15,
+    height: 60,
+    width: "80%",
   },
 });
 

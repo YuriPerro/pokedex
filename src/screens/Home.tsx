@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
+import { Entypo } from "@expo/vector-icons";
 import { getStatusBarHeight } from "react-native-iphone-x-helper";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
@@ -73,6 +74,24 @@ const Home = () => {
     }
   };
 
+  const onSearch = async (text: string) => {
+    if (text.length == 0) setFilteredPokemons(pokemons);
+    if (text.length < 3) return;
+
+    try {
+      let filtered = allPokemons.filter((pokemon) => pokemon.name.includes(text.toLowerCase()));
+      const _pokemons: Array<Pokemon> = await Promise.all(
+        filtered.map(async (pokemon: Pokemon) => {
+          let pokemonFetched = await (await getPokemon(pokemon)).data;
+          return pokemonFetched;
+        })
+      );
+      setFilteredPokemons(_pokemons);
+    } catch (error) {
+      Alert.alert("Ops", "Tivemos um erro ao pesquisar o pokemon 😯");
+    }
+  };
+
   const handleFetchMore = (distance: number) => {
     if (distance < 1) return;
 
@@ -86,9 +105,10 @@ const Home = () => {
   };
 
   const renderRow = ({ item, index }: any) => {
-    return <CardPokemon onClickCard={goProfilePokemon} key={index} pokemon={item} />;
+    if (item) return <CardPokemon onClickCard={goProfilePokemon} pokemon={item} />;
+    else return <View />;
   };
-  const keyExtractor = (item: Pokemon) => item.id.toString();
+  const keyExtractor = (item: Pokemon) => item?.id?.toString();
 
   if (loading) return <Load />;
 
@@ -113,6 +133,14 @@ const Home = () => {
             onEndReached={({ distanceFromEnd }) => {
               handleFetchMore(distanceFromEnd);
             }}
+            ListEmptyComponent={
+              <View style={{ alignItems: "center", paddingHorizontal: 25, width: '100%' }}>
+                <Text style={{ textAlign: 'center', fontFamily: Fonts.Pop300, fontSize: 18 }}>
+                  Não encontramos nenhum Pokemon com esse nome
+                </Text>
+                <Entypo name="emoji-sad" size={60} color="black" style={{opacity: .4, marginTop: 25}} />
+              </View>
+            }
             ListFooterComponent={
               loadingMore ? (
                 <ActivityIndicator style={{ marginVertical: 20 }} color={Theme.FIRE} size="large" />
@@ -123,7 +151,7 @@ const Home = () => {
           />
         </View>
 
-        <Search />
+        <Search onChangeText={onSearch} />
       </View>
     </View>
   );
