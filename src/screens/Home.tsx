@@ -92,6 +92,8 @@ const Home = () => {
     }
   };
 
+  const onClickClose = () => setFilteredPokemons(pokemons);
+
   const handleFetchMore = (distance: number) => {
     if (distance < 1) return;
 
@@ -156,7 +158,7 @@ const Home = () => {
           />
         </View>
 
-        <Search onChangeText={onSearch} />
+        <Search onClickClose={onClickClose} onChangeText={onSearch} />
       </View>
     </View>
   );

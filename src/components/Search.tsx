@@ -8,11 +8,18 @@ import { getBottomSpace } from "react-native-iphone-x-helper";
 
 type Props = {
   onChangeText: ((text: string) => void) | undefined;
+  onClickClose: () => void;
 };
 
-const Search = ({ onChangeText }: Props) => {
+const Search = ({ onChangeText, onClickClose }: Props) => {
   const [inputIsFocused, setInputIsFocused] = useState(false);
   const [searchIsOpen, setSearchIsOpen] = useState(false);
+
+  const onHandleClose = () => {
+    setSearchIsOpen(false);
+    setInputIsFocused(false);
+    onClickClose();
+  };
 
   return (
     <>
@@ -49,12 +56,7 @@ const Search = ({ onChangeText }: Props) => {
                     onChangeText={onChangeText}
                     style={styles.input}
                   />
-                  <TouchableOpacity
-                    style={{ right: 5 }}
-                    onPress={() => {
-                      setSearchIsOpen(false), setInputIsFocused(false);
-                    }}
-                  >
+                  <TouchableOpacity style={{ right: 5 }} onPress={onHandleClose}>
                     <AntDesign name="close" size={24} color="gray" />
                   </TouchableOpacity>
                 </View>
@@ -100,7 +102,7 @@ const Search = ({ onChangeText }: Props) => {
                   onChangeText={onChangeText}
                   style={styles.input}
                 />
-                <TouchableOpacity style={{ right: 5 }} onPress={() => setSearchIsOpen(false)}>
+                <TouchableOpacity style={{ right: 5 }} onPress={onHandleClose}>
                   <AntDesign name="close" size={24} color="gray" />
                 </TouchableOpacity>
               </View>
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Theme.ELETRIC,
+    backgroundColor: Theme.BACKGROUND,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontFamily: Fonts.Pop500,
-    color: Theme.BACKGROUND,
+    color: '#0d0d0d',
     fontSize: 16,
     paddingLeft: 10,
     borderRadius: 25,
