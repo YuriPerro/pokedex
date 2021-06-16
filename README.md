@@ -55,7 +55,7 @@ or
 
 ⬇ Download Pokedex ``.apk``
 
-• [Download APK](http://bit.ly/pokedex-apk)
+• [Download APK](https://expo.io/accounts/appcolt/projects/pokedex/builds/3b3db812-736f-4fb8-acdb-8f76eacc13f4)
 
 ## 📃License
 
