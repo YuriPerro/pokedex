@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AppLoading from "expo-app-loading";
 import { Asset } from "expo-asset";
+import * as Updates from "expo-updates";
 
 import Routes from "./src/routes/index";
 import {
@@ -25,12 +26,30 @@ export default function App() {
     return Promise.all([Asset.loadAsync([require("./src/assets/pokeball-icon.png")])]);
   };
 
-  useEffect(() => {
-    _loadResourcesAsync().then((res) => {
-      if (res) {
+  const onLoad = async () => {
+    if (__DEV__) {
+      _loadResourcesAsync().then(() => {
         setLoadedResources(true);
+      });
+    } else {
+      try {
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          await Updates.reloadAsync();
+        } else {
+          _loadResourcesAsync().then(() => {
+            setLoadedResources(true);
+          });
+        }
+      } catch (e) {
+        console.log(e);
       }
-    });
+    }
+  };
+
+  useEffect(() => {
+    onLoad();
   });
 
   if (!fontsLoaded || !loadedResources) {

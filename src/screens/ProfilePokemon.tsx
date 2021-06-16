@@ -10,14 +10,17 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   ActivityIndicator,
+  Image,
+  ScrollView,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Theme } from "../styles/colors";
 import { getStatusBarHeight } from "react-native-iphone-x-helper";
-import { getColorByType, getNumberPokemon, TouchableOpacity, width } from "../common/utils";
+import { getColorByType, getNumberPokemon, height, TouchableOpacity, width } from "../common/utils";
 import { Fonts } from "../styles/fonts";
 import PokemonImageScroll from "../components/PokemonImageScroll";
 import ModalSeeMore from "../components/ModalSeeMore";
+import { AntDesign } from "@expo/vector-icons";
 
 import pokeballBg from "../assets/pokeball-icon.png";
 import { api, getSpecies } from "../services/api";
@@ -39,6 +42,8 @@ const ProfilePokemon = () => {
   const [titleModal, setTitleModal] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [oldIndex, setOldIndex] = useState(0);
 
   useEffect(() => {
     if (route.params.pokemon) {
@@ -66,11 +71,9 @@ const ProfilePokemon = () => {
     if (id == 0) return;
     let initialIndex = id - 2;
     if (id <= 2) initialIndex = 1;
-
     try {
       for (let index = initialIndex; index <= id + 2; index++) {
         const resp: any = await api.get(`pokemon/${index}`);
-        console.log("fetchOnePokemon: " + index);
         setPokemonList((old) => [...old, resp.data]);
       }
       setLoading(false);
@@ -81,9 +84,8 @@ const ProfilePokemon = () => {
 
   const fetchMorePokemons = async (id: number, currentIndex: number, oldIndex: number) => {
     try {
-      if (id == 0) return;
+      if (id == 1) return;
       let idPokemon = id;
-
       const scrolledTofront = oldIndex < currentIndex;
       if (scrolledTofront) idPokemon += 1;
       else idPokemon -= 1;
@@ -91,15 +93,11 @@ const ProfilePokemon = () => {
       const filtered = pokemonList.filter((pokemon) => pokemon.id === idPokemon);
       if (filtered.length == 0) {
         const resp: any = await api.get(`pokemon/${idPokemon}`);
-        console.log("fetchMorePokemons: " + idPokemon);
 
-        console.log("scrolledTofront: " + scrolledTofront);
         if (scrolledTofront) setPokemonList((old) => [...old, resp.data]);
         else {
-          console.log("INSERIU ANTES: " + resp.data.id);
           setPokemonList((old) => [resp.data, ...old]);
         }
-      } else {
       }
     } catch (error) {
       Alert.alert("Ops", "Tivemos um erro ao carregar o proximo pokemon 🤔");
@@ -128,13 +126,6 @@ const ProfilePokemon = () => {
     }
   };
 
-  // Function used for improve performance of Flatlist
-  const getItemLayout = (item: any, index: any) => ({
-    length: 150,
-    offset: width * index - 1,
-    index,
-  });
-
   const renderItem = ({ item, index }: any) => {
     return <PokemonImageScroll idPokemon={item?.id} />;
   };
@@ -147,17 +138,11 @@ const ProfilePokemon = () => {
       pokemonList.length
     );
     let fixedPage = pageNumber - 1;
+    if (pokemon) setOldIndex(pokemon?.id);
+    setCurrentIndex(pokemonList[fixedPage].id);
     setPokemon(pokemonList[fixedPage]);
     if (pokemon)
       fetchMorePokemons(pokemonList[fixedPage].id, pokemonList[fixedPage].id, pokemon?.id);
-  };
-
-  const getInitialScrollIndex = () => {
-    if (pokemonList.length > 1 && route.params.pokemon.id <= 1) return 0;
-    else if (route.params.pokemon.id == 2) return 1;
-    else if (pokemonList.length > 2) {
-      return 2;
-    } else return null;
   };
 
   if (!pokemon) return <Load />;
@@ -166,7 +151,7 @@ const ProfilePokemon = () => {
     <View
       style={[styles.container, { backgroundColor: getColorByType(pokemon?.types[0].type.name) }]}
     >
-      <StatusBar barStyle={"light-content"} />
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <View style={styles.header}>
         <TouchableOpacity onPress={navigation.goBack}>
           <MaterialCommunityIcons name="arrow-left" size={32} color="white" />
@@ -186,17 +171,16 @@ const ProfilePokemon = () => {
             })}
         </View>
       </View>
-      <View style={{ zIndex: 2, height: 250, alignItems: "center" }}>
-        <View style={{ position: "absolute" }}>
-          {/* <Image
-            width={220}
-            height={220}
-            style={{ width: 220, height: 220, top: 20, position: "relative" }}
-            source={pokeballBg}
-          /> */}
+      <View style={{ zIndex: 2, height: 250, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ position: "absolute", justifyContent: "center" }}>
+          <Image width={220} height={220} style={styles.image} source={pokeballBg} />
+        </View>
+        <View style={styles.arrows}>
+          <AntDesign name="arrowleft" style={{ opacity: 0.2 }} size={24} color={"#000"} />
+          <AntDesign name="arrowright" style={{ opacity: 0.2 }} size={24} color={"#000"} />
         </View>
         {loading ? (
-          <ActivityIndicator />
+          <ActivityIndicator size="large" />
         ) : (
           <FlatList
             ref={flatList}
@@ -207,148 +191,146 @@ const ProfilePokemon = () => {
             showsHorizontalScrollIndicator={false}
             renderItem={renderItem}
             onMomentumScrollEnd={onScrollEnd}
-            //getItemLayout={getItemLayout}
-            initialScrollIndex={getInitialScrollIndex()}
+            onContentSizeChange={() => {
+              if (oldIndex > currentIndex) {
+                flatList.current?.scrollToIndex({ animated: false, index: 1 });
+              }
+            }}
+            onLayout={() => {
+              flatList.current?.scrollToIndex({ animated: false, index: 2 });
+            }}
           />
         )}
       </View>
 
       <View style={styles.contentProfilePokemon}>
-        <View style={styles.firstSectionInfo}>
-          <View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.typeInfo}>Species</Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.typeInfo}>Height</Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.typeInfo}>Weight</Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.typeInfo}>Abilities</Text>
-            </View>
-          </View>
-
-          {pokemon && (
-            <View style={{ marginLeft: 45 }}>
+        <ScrollView
+          style={{ marginTop: width < 375 ? 125 : 100 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.firstSectionInfo}>
+            <View>
               <View style={styles.itemInfo}>
-                {Object.keys(pokemon?.stats).map((id, index) =>
-                  index < 2 ? (
+                <Text style={styles.typeInfo}>Species</Text>
+              </View>
+              <View style={styles.itemInfo}>
+                <Text style={styles.typeInfo}>Height</Text>
+              </View>
+              <View style={styles.itemInfo}>
+                <Text style={styles.typeInfo}>Weight</Text>
+              </View>
+              <View style={styles.itemInfo}>
+                <Text style={styles.typeInfo}>Abilities</Text>
+              </View>
+            </View>
+
+            {pokemon && (
+              <View style={{ marginLeft: 45 }}>
+                <View style={styles.itemInfo}>
+                  {Object.keys(pokemon?.types).map((id, index) => (
                     <Text key={id} style={[styles.infoPokemon]}>
-                      {pokemon?.stats[parseFloat(id)].stat.name}
-                      {index != 1 ? ", " : null}
+                      {pokemon.types[parseInt(id)].type.name}
                     </Text>
-                  ) : null
-                )}
-                {/* {pokemon?.stats.length >= 2 ? (
+                  ))}
+                </View>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.infoPokemon}>
+                    {convertDecToPol(pokemon?.weight)} ({pokemon?.height * 10} cm)
+                  </Text>
+                </View>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.infoPokemon}>
+                    {convertHectoToLbs(pokemon?.weight)} lbs ({pokemon?.weight / 10} kg)
+                  </Text>
+                </View>
+                <View style={styles.itemInfo}>
+                  {Object.keys(pokemon?.abilities).map((id, index) =>
+                    index < 2 ? (
+                      <Text key={id} style={[styles.infoPokemon]}>
+                        {pokemon?.abilities[parseFloat(id)].ability.name}
+                        {index != 1 ? ", " : null}
+                      </Text>
+                    ) : null
+                  )}
+                </View>
+                {pokemon?.abilities.length > 2 ? (
                   <TouchableOpacity
-                    onPress={() => openModal(SPECIES)}
+                    onPress={() => openModal(ABILITIES)}
                     style={[
                       styles.seeMore,
-                      { backgroundColor: getColorByType(pokemon.types[0].type.name) },
+                      {
+                        backgroundColor: getColorByType(pokemon.types[0].type.name),
+                        marginLeft: 0,
+                      },
                     ]}
                   >
                     <Text style={{ fontFamily: Fonts.Pop700, fontSize: 11, color: "#fff" }}>
                       see more
                     </Text>
                   </TouchableOpacity>
-                ) : null} */}
+                ) : null}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.secondSectionInfo}>
+            <View>
+              <View style={styles.viewSubTitle}>
+                <Text style={styles.subTitleSection}>Breeding</Text>
               </View>
               <View style={styles.itemInfo}>
-                <Text style={styles.infoPokemon}>
-                  {convertDecToPol(pokemon?.weight)} ({pokemon?.height * 10} cm)
-                </Text>
+                <Text style={styles.typeInfo}>Gender</Text>
               </View>
               <View style={styles.itemInfo}>
-                <Text style={styles.infoPokemon}>
-                  {convertHectoToLbs(pokemon?.weight)} lbs ({pokemon?.weight / 10} kg)
-                </Text>
+                <Text style={styles.typeInfo}>Egg Group</Text>
+                <Text style={styles.infoPokemon}></Text>
               </View>
               <View style={styles.itemInfo}>
-                {Object.keys(pokemon?.abilities).map((id, index) =>
-                  index < 2 ? (
-                    <Text key={id} style={[styles.infoPokemon]}>
-                      {pokemon?.abilities[parseFloat(id)].ability.name}
-                      {index != 1 ? ", " : null}
+                <Text style={styles.typeInfo}>Egg Cycle</Text>
+              </View>
+            </View>
+            <View style={{ marginLeft: 25 }}>
+              <View style={styles.viewSubTitle}>
+                <Text style={styles.subTitleSection}> </Text>
+              </View>
+              {species && (
+                <View style={styles.itemInfo}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <MaterialCommunityIcons
+                      name="gender-male"
+                      style={{ transform: [{ rotateZ: "-45deg" }] }}
+                      size={21}
+                      color="blue"
+                    />
+                    <Text style={[styles.infoPokemon, { marginRight: 15 }]}>
+                      {(((8 - species.gender_rate) / 8) * 100).toFixed(1)}%
                     </Text>
-                  ) : null
-                )}
-              </View>
-              {pokemon?.abilities.length > 2 ? (
-                <TouchableOpacity
-                  onPress={() => openModal(ABILITIES)}
-                  style={[
-                    styles.seeMore,
-                    { backgroundColor: getColorByType(pokemon.types[0].type.name), marginLeft: 0 },
-                  ]}
-                >
-                  <Text style={{ fontFamily: Fonts.Pop700, fontSize: 11, color: "#fff" }}>
-                    see more
-                  </Text>
-                </TouchableOpacity>
-              ) : null}
-            </View>
-          )}
-        </View>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <MaterialCommunityIcons name="gender-female" size={24} color="pink" />
+                    <Text style={styles.infoPokemon}>
+                      {((species.gender_rate / 8) * 100).toFixed(1)}%
+                    </Text>
+                  </View>
+                </View>
+              )}
 
-        <View style={styles.secondSectionInfo}>
-          <View>
-            <View style={styles.viewSubTitle}>
-              <Text style={styles.subTitleSection}>Breeding</Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.typeInfo}>Gender</Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.typeInfo}>Egg Group</Text>
-              <Text style={styles.infoPokemon}></Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.typeInfo}>Egg Cycle</Text>
+              {species && (
+                <View style={styles.itemInfo}>
+                  {Object.keys(species.egg_groups).map((id, index) => (
+                    <Text key={id} style={styles.infoPokemon}>
+                      {species?.egg_groups[id]?.name}
+                      {species.egg_groups.length != index + 1 ? ", " : null}
+                    </Text>
+                  ))}
+                </View>
+              )}
+              <View style={[styles.itemInfo, { top: 2 }]}>
+                <Text style={styles.infoPokemon}>{species?.hatch_counter}</Text>
+              </View>
             </View>
           </View>
-          <View style={{ marginLeft: 25 }}>
-            <View style={styles.viewSubTitle}>
-              <Text style={styles.subTitleSection}> </Text>
-            </View>
-            {species && (
-              <View style={styles.itemInfo}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <MaterialCommunityIcons
-                    name="gender-male"
-                    style={{ transform: [{ rotateZ: "-45deg" }] }}
-                    size={21}
-                    color="blue"
-                  />
-                  <Text style={[styles.infoPokemon, { marginRight: 15 }]}>
-                    {(((8 - species.gender_rate) / 8) * 100).toFixed(1)}%
-                  </Text>
-                </View>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <MaterialCommunityIcons name="gender-female" size={24} color="pink" />
-                  <Text style={styles.infoPokemon}>
-                    {((species.gender_rate / 8) * 100).toFixed(1)}%
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            {species && (
-              <View style={styles.itemInfo}>
-                {Object.keys(species.egg_groups).map((id, index) => (
-                  <Text key={id} style={styles.infoPokemon}>
-                    {species?.egg_groups[id]?.name}
-                    {species.egg_groups.length != index + 1 ? ", " : null}
-                  </Text>
-                ))}
-              </View>
-            )}
-            <View style={[styles.itemInfo, { top: 2 }]}>
-              <Text style={styles.infoPokemon}>{species?.hatch_counter}</Text>
-            </View>
-          </View>
-        </View>
+        </ScrollView>
       </View>
       <ModalSeeMore pokemon={pokemon} titleModal={titleModal} modalRef={modalRef} />
     </View>
@@ -406,6 +388,7 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.BACKGROUND,
     width: "100%",
     height: "65%",
+    paddingBottom: 25,
     borderTopRightRadius: 40,
     borderTopLeftRadius: 40,
     position: "absolute",
@@ -414,7 +397,6 @@ const styles = StyleSheet.create({
   },
   firstSectionInfo: {
     width: "100%",
-    marginTop: 100,
     paddingHorizontal: 30,
     flexDirection: "row",
     alignItems: "center",
@@ -453,6 +435,22 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Pop600,
     fontSize: 16,
     textAlign: "left",
+  },
+  image: {
+    width: 220,
+    height: 220,
+    opacity: 0.04,
+    position: "relative",
+    top: height > 750 ? 22 : 0,
+    marginBottom: height < 750 ? 20 : 0,
+  },
+  arrows: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "absolute",
+    width: "100%",
+    justifyContent: "space-between",
+    paddingHorizontal: 45,
   },
 });
 

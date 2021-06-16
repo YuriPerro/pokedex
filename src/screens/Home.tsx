@@ -23,9 +23,6 @@ import { useNavigation } from "@react-navigation/native";
 import Search from "../components/Search";
 import { Alert } from "react-native";
 
-import { SvgFromUri } from "react-native-svg";
-import PokeballBg from "../components/PokeballBg";
-
 const Home = () => {
   const navigation = useNavigation();
 
@@ -120,7 +117,7 @@ const Home = () => {
   return (
     <View style={styles.container}>
       <View style={styles.wrappedContainer}>
-        <StatusBar barStyle="dark-content" translucent />
+        <StatusBar barStyle="dark-content" translucent  backgroundColor="transparent" />
         <View style={{ position: "absolute", right: 0 }}>
           <Image source={pokeballBg} style={styles.imageBg} />
         </View>
