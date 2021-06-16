@@ -34,13 +34,11 @@ const ModalSeeMore = ({ modalRef, pokemon, titleModal }: Props) => {
           ? Object.keys(pokemon?.stats).map((id, index) => (
               <Text key={id} style={[styles.infoPokemon]}>
                 {pokemon?.stats[parseFloat(id)].stat.name}
-                {index != 1 ? ", " : null}
               </Text>
             ))
           : Object.keys(pokemon?.abilities).map((id, index) => (
               <Text key={id} style={[styles.infoPokemon]}>
                 {pokemon?.abilities[parseFloat(id)].ability.name}
-                {index != 1 ? ", " : null}
               </Text>
             ))}
       </View>

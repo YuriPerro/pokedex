@@ -23,6 +23,9 @@ import { useNavigation } from "@react-navigation/native";
 import Search from "../components/Search";
 import { Alert } from "react-native";
 
+import { SvgFromUri } from "react-native-svg";
+import PokeballBg from "../components/PokeballBg";
+
 const Home = () => {
   const navigation = useNavigation();
 
@@ -157,7 +160,6 @@ const Home = () => {
             }
           />
         </View>
-
         <Search onClickClose={onClickClose} onChangeText={onSearch} />
       </View>
     </View>

@@ -1,5 +1,4 @@
 import React from "react";
-import { useEffect } from "react";
 import { StyleSheet, Image, View } from "react-native";
 import { getUrlImages, width } from "../common/utils";
 

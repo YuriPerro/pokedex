@@ -1,7 +1,6 @@
-import React from "react";
-import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
 import AppLoading from "expo-app-loading";
-import { StyleSheet, Text, View } from "react-native";
+import { Asset } from "expo-asset";
 
 import Routes from "./src/routes/index";
 import {
@@ -13,6 +12,8 @@ import {
 } from "@expo-google-fonts/poppins";
 
 export default function App() {
+  const [loadedResources, setLoadedResources] = useState(false);
+
   const [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_500Medium,
@@ -20,7 +21,19 @@ export default function App() {
     Poppins_700Bold,
   });
 
-  if (!fontsLoaded) {
+  const _loadResourcesAsync = async () => {
+    return Promise.all([Asset.loadAsync([require("./src/assets/pokeball-icon.png")])]);
+  };
+
+  useEffect(() => {
+    _loadResourcesAsync().then((res) => {
+      if (res) {
+        setLoadedResources(true);
+      }
+    });
+  });
+
+  if (!fontsLoaded || !loadedResources) {
     return <AppLoading />;
   }
 

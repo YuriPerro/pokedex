@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontFamily: Fonts.Pop500,
-    color: '#0d0d0d',
+    color: "#0d0d0d",
     fontSize: 16,
     paddingLeft: 10,
     borderRadius: 25,
