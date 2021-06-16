@@ -53,6 +53,10 @@ or
 4. expo start
 ```
 
+⬇ Download Pokedex ``.apk``
+
+[Download APK](http://bit.ly/pokedex-apk)
+
 ## 📃License
 
 * Licensed for users and contributors under MIT license.
