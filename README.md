@@ -55,7 +55,7 @@ or
 
 ⬇ Download Pokedex ``.apk``
 
-[Download APK](http://bit.ly/pokedex-apk)
+• [Download APK](http://bit.ly/pokedex-apk)
 
 ## 📃License
 
