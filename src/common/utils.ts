@@ -26,7 +26,7 @@ const getUrlImages = (id: string) => {
   return `https://pokeres.bastionbot.org/images/pokemon/${id}.png`;
 };
 
-// Function used for get custom Id Pokemon
+// used to get custom Id Pokemon
 const getNumberPokemon = (id: string) => {
   if (id.length == 1) {
     return "#00" + id;
@@ -35,6 +35,7 @@ const getNumberPokemon = (id: string) => {
   }
 };
 
+// used to get color of pokemon based on your type
 const getColorByType = (type: string | undefined) => {
   switch (type) {
     case "grass":
