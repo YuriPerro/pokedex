@@ -1,35 +1,35 @@
-import React from "react";
-import { useEffect } from "react";
+import React, { PureComponent } from "react";
 import { StyleSheet, Image, View } from "react-native";
 import { getUrlImages, width } from "../common/utils";
 
 type Props = {
   idPokemon: number;
-  key: string;
 };
 
-const PokemonImageScroll = ({ idPokemon, key }: Props) => {
-
-  return (
-    <View key={key} style={styles.container}>
-      <Image
-        width={150}
-        height={150}
-        style={{ width: 150, height: 150 }}
-        source={{ uri: getUrlImages(String(idPokemon)) }}
-      />
-    </View>
-  );
-};
+class CardPokemon extends PureComponent<Props> {
+  render() {
+    const { idPokemon } = this.props;
+    return (
+      <View key={idPokemon} style={styles.container}>
+        <Image
+          width={160}
+          height={160}
+          style={{ width: 160, height: 160 }}
+          source={{ uri: getUrlImages(String(idPokemon)) }}
+        />
+      </View>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
     width: width,
+    height: 150,
     alignItems: "center",
     position: "relative",
-    top: 50,
-    zIndex: 99,
+    top: 45,
   },
 });
 
-export default PokemonImageScroll;
+export default CardPokemon;

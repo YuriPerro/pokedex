@@ -8,60 +8,91 @@ import {
   Image,
   FlatList,
   ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
 } from "react-native";
-import { getBottomSpace, getStatusBarHeight } from "react-native-iphone-x-helper";
+import { Entypo } from "@expo/vector-icons";
+import { getStatusBarHeight } from "react-native-iphone-x-helper";
 import { Theme } from "../styles/colors";
 import { Fonts } from "../styles/fonts";
-import { AntDesign } from "@expo/vector-icons";
 
 import pokeballBg from "../assets/pokeball-icon.png";
 import { api, getPokemon } from "../services/api";
 import { Load } from "../components/Load";
 import { useState } from "react";
 import CardPokemon from "../components/CardPokemon";
-import { height, TouchableOpacity, width } from "../common/utils";
 import { useNavigation } from "@react-navigation/native";
-import { TextInput } from "react-native-gesture-handler";
+import Search from "../components/Search";
+import { Alert } from "react-native";
 
 const Home = () => {
   const navigation = useNavigation();
 
   const [loading, setLoading] = useState(true);
-  const [searchIsOpen, setSearchIsOpen] = useState(false);
   const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-
+  const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
-  const [marginBottom, setMarginBottom] = useState(30);
 
   useEffect(() => {
     fetchPokemons();
+    fetchPokemonsAllPokemons();
   }, []);
 
-  const fetchPokemons = async () => {
-    const resp = await api.get(`pokemon?limit=10&offset=${page}`);
-    const results = resp.data.results;
-    const _pokemons: Array<Pokemon> = await Promise.all(
-      results.map(async (pokemon: Pokemon) => {
-        let pokemonFetched = await (await getPokemon(pokemon)).data;
-        return pokemonFetched;
-      })
-    );
-
-    if (page > 0) {
-      setPokemons((oldValue) => [...oldValue, ..._pokemons]);
-      setFilteredPokemons((oldValue) => [...oldValue, ..._pokemons]);
-    } else {
-      setPokemons(_pokemons);
-      setFilteredPokemons(_pokemons);
+  const fetchPokemonsAllPokemons = async () => {
+    try {
+      const resp = await api.get(`pokemon?limit=1118&offset=0`);
+      const results = resp.data.results;
+      if (results) setAllPokemons(results);
+    } catch (err) {
+      Alert.alert("Ops", "Não conseguimos carregar os pokemons para a pesquisa 😥");
     }
-
-    setLoadingMore(false);
-    setLoading(false);
   };
+
+  const fetchPokemons = async () => {
+    try {
+      const resp = await api.get(`pokemon?limit=10&offset=${page}`);
+      const results = resp.data.results;
+      const _pokemons: Array<Pokemon> = await Promise.all(
+        results.map(async (pokemon: Pokemon) => {
+          let pokemonFetched = await (await getPokemon(pokemon)).data;
+          return pokemonFetched;
+        })
+      );
+
+      if (page > 0) {
+        setPokemons((oldValue) => [...oldValue, ..._pokemons]);
+        setFilteredPokemons((oldValue) => [...oldValue, ..._pokemons]);
+      } else {
+        setPokemons(_pokemons);
+        setFilteredPokemons(_pokemons);
+      }
+
+      setLoadingMore(false);
+      setLoading(false);
+    } catch (err) {
+      Alert.alert("Ops", "Não conseguimos carregar os pokemons 😥");
+    }
+  };
+
+  const onSearch = async (text: string) => {
+    if (text.length == 0) setFilteredPokemons(pokemons);
+    if (text.length < 3) return;
+
+    try {
+      let filtered = allPokemons.filter((pokemon) => pokemon.name.includes(text.toLowerCase()));
+      const _pokemons: Array<Pokemon> = await Promise.all(
+        filtered.map(async (pokemon: Pokemon) => {
+          let pokemonFetched = await (await getPokemon(pokemon)).data;
+          return pokemonFetched;
+        })
+      );
+      setFilteredPokemons(_pokemons);
+    } catch (error) {
+      Alert.alert("Ops", "Tivemos um erro ao pesquisar o pokemon 😯");
+    }
+  };
+
+  const onClickClose = () => setFilteredPokemons(pokemons);
 
   const handleFetchMore = (distance: number) => {
     if (distance < 1) return;
@@ -76,16 +107,17 @@ const Home = () => {
   };
 
   const renderRow = ({ item, index }: any) => {
-    return <CardPokemon onClickCard={goProfilePokemon} key={index} pokemon={item} />;
+    if (item) return <CardPokemon onClickCard={goProfilePokemon} pokemon={item} />;
+    else return <View />;
   };
-  const keyExtractor = (item: Pokemon) => item.id.toString();
+  const keyExtractor = (item: Pokemon) => item?.id?.toString();
 
   if (loading) return <Load />;
 
   return (
     <View style={styles.container}>
       <View style={styles.wrappedContainer}>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle="dark-content" translucent  backgroundColor="transparent" />
         <View style={{ position: "absolute", right: 0 }}>
           <Image source={pokeballBg} style={styles.imageBg} />
         </View>
@@ -103,6 +135,19 @@ const Home = () => {
             onEndReached={({ distanceFromEnd }) => {
               handleFetchMore(distanceFromEnd);
             }}
+            ListEmptyComponent={
+              <View style={{ alignItems: "center", paddingHorizontal: 25, width: "100%" }}>
+                <Text style={{ textAlign: "center", fontFamily: Fonts.Pop300, fontSize: 18 }}>
+                  Não encontramos nenhum Pokemon com esse nome
+                </Text>
+                <Entypo
+                  name="emoji-sad"
+                  size={60}
+                  color="black"
+                  style={{ opacity: 0.4, marginTop: 25 }}
+                />
+              </View>
+            }
             ListFooterComponent={
               loadingMore ? (
                 <ActivityIndicator style={{ marginVertical: 20 }} color={Theme.FIRE} size="large" />
@@ -112,44 +157,7 @@ const Home = () => {
             }
           />
         </View>
-
-        <KeyboardAvoidingView behavior="padding">
-          <View style={[styles.containerSearch, { width: searchIsOpen ? "95%" : 60 }]}>
-            <TouchableOpacity
-              activeOpacity={0.5}
-              onPress={() => setSearchIsOpen(true)}
-              disabled={searchIsOpen}
-              style={{
-                width: searchIsOpen ? "95%" : 60,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {searchIsOpen ? (
-                <View style={{ flexDirection: "row", alignItems: "center", width: "100%" }}>
-                  <TextInput
-                    placeholder="Pesquisar Pokemon"
-                    style={{
-                      fontFamily: Fonts.Pop500,
-                      color: Theme.BACKGROUND,
-                      fontSize: 16,
-                      paddingLeft: 10,
-                      borderRadius: 25,
-                      marginRight: 15,
-                      height: 60,
-                      width: "80%",
-                    }}
-                  />
-                  <TouchableOpacity onPress={() => setSearchIsOpen(false)}>
-                    <AntDesign name="close" size={24} color="black" />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <AntDesign name="search1" size={24} color="white" />
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
+        <Search onClickClose={onClickClose} onChangeText={onSearch} />
       </View>
     </View>
   );
@@ -162,7 +170,7 @@ const styles = StyleSheet.create({
   },
   wrappedContainer: {
     marginTop: Platform.OS === "ios" ? getStatusBarHeight() : StatusBar.currentHeight,
-    paddingTop: 40,
+    paddingTop: Platform.OS === "ios" ? 40 : 15,
     paddingHorizontal: 10,
     flex: 1,
   },
@@ -184,25 +192,6 @@ const styles = StyleSheet.create({
   },
   containerFlatlist: {
     flex: 1,
-  },
-  containerSearch: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Theme.ELETRIC,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 2.9,
-    elevation: 2,
-    bottom: Platform.OS === "ios" ? getBottomSpace() : 25,
-    right: 10,
-    alignSelf: "flex-end",
   },
 });
 

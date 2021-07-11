@@ -15,6 +15,7 @@ export const TouchableOpacity =
 
 export const ScrollView = Platform.OS === "android" ? ScrollViewAndroid : ScrollViewIOS;
 
+// Function used for get sizes of screen
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 
@@ -25,6 +26,7 @@ const getUrlImages = (id: string) => {
   return `https://pokeres.bastionbot.org/images/pokemon/${id}.png`;
 };
 
+// Function used for get custom Id Pokemon
 const getNumberPokemon = (id: string) => {
   if (id.length == 1) {
     return "#00" + id;
