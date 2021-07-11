@@ -20,6 +20,7 @@ const height = Dimensions.get("window").height;
 
 const isSmallDevice = width < 375;
 
+// api to get pokemons images
 const getUrlImages = (id: string) => {
   return `https://pokeres.bastionbot.org/images/pokemon/${id}.png`;
 };
