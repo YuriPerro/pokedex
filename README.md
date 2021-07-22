@@ -1,10 +1,10 @@
 ![go move](https://i.imgur.com/UbX3skO.png)
 
 <h1 align="center">
-    <a>🛑 Pokedex</a>
+    <a>🛑 Pokedex </a>
 </h1>
 
-<p align="center">🔗 Challenge of Mais Controle. </p>
+<p align="center"> 🔗 Challenge of Mais Controle. </p>
 <div align="center">
     <img src="https://img.shields.io/static/v1?label=React-Native&message=v0.64&color=6D21B4&style=for-the-badge&logo=react" />
     <img src="https://img.shields.io/static/v1?label=Typescript&message=v4.2&color=2184B4&style=for-the-badge&logo=typescript" />
