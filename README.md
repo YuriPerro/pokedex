@@ -36,6 +36,7 @@ The project can be built with npm or yarn, so choose one of the approach bellow 
 
 ⬇ To download the project follow the instructions bellow
 
+
 ```
 1. git clone https://github.com/YuriPerro/pokedex.git
 2. cd pokedex
